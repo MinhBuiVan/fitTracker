@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    ports:
+      - "3316:3316"
+    command: --port=3316
+    environment:
+      MYSQL_ROOT_PASSWORD: abc
+      MYSQL_DATABASE: fit
+#      MYSQL_USER: root
+#      MYSQL_PASSWORD: abc
+    volumes:
+      - ./maria-data:/var/lib/mysql
+    networks:
+      springboot-mariadb-net:
+
+  fit-tracker:
+    container_name: fit-tracker
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mariadb
+    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3316/fit
+#      - SPRING_DATASOURCE_USERNAME=root
+#      - SPRING_DATASOURCE_PASSWORD=abc
+      - spring.datasource.url=jdbc:mariadb://mariadb:3316/fit
+      - spring.datasource.username=root
+      - spring.datasource.password=abc
+      - spring.jpa.hibernate.ddl-auto=update
+      - spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB103Dialect
+#    volumes:
+#      - "D:/WORK/backend/springboot/volume:/path/to/app"
+    networks:
+      springboot-mariadb-net:
+    restart: on-failure
+
+networks:
+  springboot-mariadb-net:
+
+#volumes:
+#  database:
